@@ -8,7 +8,7 @@ const criarPessoaElement = (item) => {
     // preencher os dados
     const itens_pessoas = PessoaElement.querySelectorAll('span')
   
-    itens_pessoas[0].innerText = item.nome
+    itens_pessoas[0].innerText = item.name
     itens_pessoas[1].innerText = item.senha
     itens_pessoas[2].innerText = item.email
     
@@ -41,18 +41,19 @@ const criarPessoaElement = (item) => {
     const pessoaSenhaElement = document.getElementById('pessoa-senha')
     const pessoaEmailElement = document.getElementById('pessoa-email')
     
-  
+    
     const person = {
-      nome: pessoaNomeElement.value,
-      senha: pessoaSenhaElement.value,
-      genero: pessoaEmailElement.value
-      
+        name: pessoaNomeElement.value,
+        senha: pessoaSenhaElement.value,
+        email: pessoaEmailElement.value
+        
     }
-  
+    
     const init = {
-      method: 'POST',
-      headers: {
-        "Content-Type": 'application/json'
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            "Content-Type": 'application/json'
       },
       body: JSON.stringify(person)
     }
@@ -61,23 +62,23 @@ const criarPessoaElement = (item) => {
     const response = await fetch('http://localhost:3007/signup', init)
     console.log(response)
     const dados = await response.json()
-  
+    
     // Adicionar novo filme à listagem
     const containerPessoaElement = document.getElementById('Container-Pessoas')
-  
+    
     const pessoaElement = criarPessoaElement(dados)
   
     
     containerPessoaElement.prepend(pessoaElement)
-  }
-  
-  
-  window.onload = () => {
+    document.location.reload(true);
+}
+
+
+window.onload = () => {
     carregarPessoas()
   
     const btnNovouser = document.getElementById('btnAddPessoa')
   
     btnNovouser.onclick = novoUser
-  
     console.log('Iniciado')
   }
