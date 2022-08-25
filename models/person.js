@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Person = mongoose.model("Person", {
     name:String,
     senha:String,
-    approved:Boolean,
+    email:String,
 });
 
 module.exports = Person

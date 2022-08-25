@@ -2,8 +2,8 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-
-
+const aux = require('./data/mongo/mongodatabase')
+const cors = require('cors')
 
 //ler json
 app.use(
@@ -13,11 +13,12 @@ app.use(
 )
 
 app.use(express.json())
+app.use(cors())
 
 //rotas API
-const signup = require('./routes/sign-up-in')
+const signup = require('./routes/sign-up')
 
-app.use('/person', signup)
+app.use('/signup', signup)
 
 
 //rota-inicial // endpoint
@@ -28,12 +29,10 @@ app.get('/',(req, res)=>{
 })
 
 //porta
-mongoose.connect(
-    'mongodb+srv://jossueljs:3h32gvY0fKIPzlCm@apicluster.9pleccd.mongodb.net/?retryWrites=true&w=majority'
-    )
+aux
  .then(()=>{
 console.log("Conectado ao mongoDB")
-app.listen(3000)
+app.listen(3007)
 
  })
  .catch((err)=>{

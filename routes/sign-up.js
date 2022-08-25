@@ -1,15 +1,17 @@
 const router =require('express').Router()
 const Person = require('../models/person');
 const authmiddle = require('../middlewares/auth_midleware')
+const cors = require('cors')
+router.use(cors())
 
 //middleware
-router.use(authmiddle)
+//router.use(authmiddle)
 //New Users
 router.post('/',(req,res)=>{
 
     //req.body
     
-    const  {name,senha,approved } = req.body
+    const  {name,senha, email } = req.body
     
     if(!name){
         res.status(442).json({error:'O nome e Obrigatorio!'})
@@ -19,7 +21,7 @@ router.post('/',(req,res)=>{
     const person = {
         name,
         senha,
-        approved
+        email
     }
     async function f1(){
       

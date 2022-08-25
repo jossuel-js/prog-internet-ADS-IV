@@ -1,3 +1,6 @@
+/*
+const { error } = require('console');
+const jwt =require('jsonwebtoken');
 
 
  function AuthMiddleware(request, 
@@ -21,11 +24,11 @@
 
 
         if (authType === 'Bearer'){
-            // Validar o Token para liberar ou não a requisição
+            
         }
-
         console.log(`Auth Middleware 🃏 -> ${authType}->${authValue}`)
         
         return next()
 }
 module.exports = AuthMiddleware
+*/
