@@ -1,73 +1,99 @@
-const router =require('express').Router()
-const Person = require('../models/person');
-const authmiddle = require('../middlewares/auth_midleware')
+const app =require('express').Router()
+const User = require('models/person');
 const cors = require('cors')
-router.use(cors())
+const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+app.use(cors())
 
 //middleware
-//router.use(authmiddle)
+
 //New Users
-router.post('/',(req,res)=>{
 
-    //req.body
+
+app.post("/registro", async (req, res) => {
     
-    const  {name,senha, email } = req.body
-    
-    if(!name){
-        res.status(442).json({error:'O nome e Obrigatorio!'})
-        return
-    }
-    
-    const person = {
-        name,
-        senha,
-        email
-    }
-    async function f1(){
+    try {
+      // input
+      const { name, email,senha } = req.body;
+  
+      // Validar
+      if (!(email && senha && name)) {
+        res.status(400).send("Credenciais Insuficientess");
+      }
+  
       
-        try {
-       //criando dados
-      await  Person.create(person)
-       
-       res.status(201).json({message:'Pessoa Inserida com sucesso !'})
-       
-    }
-    catch(error){
-        res.status(500).json({error: error})
-    }
-    } 
-    
-    f1()
-    
-    
-    })
-
-
-    //req de dados
-    router.get('/',async (req, res)=>{
-        try {
-            const people = await Person.find()
-            res.status(200).json(people)
-
-        } catch (error) {
-            res.status(500).json({error: error})  
+      // Validar 
+      const userAntigo = await User.findOne({ email });
+  
+      if (userAntigo) {
+        return res.status(409).send("User Already Exist. Please Login");
+      }
+  
+      //Encrypt 
+       encryptedPassword = await bcrypt.hash(senha, 10);
+  
+     
+      const user = await User.create({
+        name: name,
+        email: email.toLowerCase(), // sanitize: convert email to lowercase
+        senha: encryptedPassword,
+      });
+  
+      // Create token
+      const token = jwt.sign(
+        { user_id: user._id, email },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: "2h",
         }
-    })
+      );
+      // save user token
+      user.token = token;
+  
+      // return user novo
+      res.status(201).json(user);
+    } catch (err) {
+      console.log(err);
+    }
+    
+  });
+  app.post("/login", async (req, res) => {
 
-    router.get('/:id', async (req,res)=>{
-        const id=req.params.id
-        try {
-            const person = await Person.findOne({ _id : id })
+    
+    try {
+      
+      const { email,senha } = req.body;
+  
+      
+      if (!(email && senha)) {
+        res.status(400).send("Credencias Invalidas");
+      }
+      
+      const user = await User.findOne({ email });
+  
+      if (user && (await bcrypt.compare(senha, user.senha))) {
+        // Criar tkn
+        const token = jwt.sign(
+          { user_id: user._id, email },
+          process.env.TOKEN_KEY,
+          {
+            expiresIn: "2h",
+          }
+        );
+  
+        // save token
+        user.token = token;
+  
+        
+        res.status(200).json(user);
+      }
+      res.status(400).send("Credencias Invalidas");
+    } catch (err) {
+      console.log(err);
+    }
+    
+  });
+  
+ 
 
-            if(!person){
-                res.status(442).json({error:"usuario não foi encontrado"})
-                return
-            }
-
-            res.status(200).json(person)
-        } catch (error) {
-            res.status(500).json({error: error})  
-        }
-    })
-
-    module.exports = router
+    module.exports = app

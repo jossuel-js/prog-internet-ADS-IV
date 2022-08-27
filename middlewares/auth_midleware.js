@@ -1,10 +1,9 @@
-/*
-const { error } = require('console');
-const jwt =require('jsonwebtoken');
+
 
 
  function AuthMiddleware(request, 
     response, next){
+
 
         const auth = request.headers.authorization
 
@@ -30,5 +29,4 @@ const jwt =require('jsonwebtoken');
         
         return next()
 }
-module.exports = AuthMiddleware
-*/
+module.exports = AuthMiddleware 
