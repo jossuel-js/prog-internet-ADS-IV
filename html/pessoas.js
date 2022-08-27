@@ -48,7 +48,7 @@ const criarPessoaElement = (item) => {
         email: pessoaEmailElement.value
         
     }
-    
+    //add auth no headers
     const init = {
         method: 'POST',
         mode: 'cors',
