@@ -1,8 +1,10 @@
 const app =require('express').Router()
-const User = require('models/person');
+const User = require('../models/person');
 const cors = require('cors')
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const mailer = require('../modules/mailer')
 app.use(cors())
 
 //middleware
@@ -94,6 +96,84 @@ app.post("/registro", async (req, res) => {
     
   });
   
+  app.post("/forgot", async (req, res) => {
+
+    
+    try {
+      
+      const { email} = req.body;
+  
+      
+      if (!(email)) {
+        res.status(400).send("Credencias Invalidas");
+      }
+      
+      const user = await User.findOne({ email });
+
+    const token = crypto.randomBytes(20).toString('hex')
+    const now =new Date()
+    now.setHours(now.getHours()+1)
+
+    await User.findByIdAndUpdate(user.id,  {
+     '$set':{
+      passwordResetToken:token,
+      passwordResetExpire:now,
+     }
+    })
+
+    mailer.sendMail({
+    to:email,
+    from:'jossueltherock@gmail.com', 
+    template:'/auth/forgot',
+    context:{ token },
+
+  },(err)=>{
+    if(err)
+    return res.status(400).send({error:'Não foi possivel realizar'})
+    
+  } )
+
+
+   } catch (err) {
+    console.log(err)
+    res.status(400).send({error:'Falha ao solicitar o processo'})
+   }
+
+
+  })
  
+app.post("/resetsenha" , async (req, res) => {
+const {email,token,senha} = req.body
+
+try {
+  const user = await User.findOne({ email })
+   .select('+passwordResetToken  passwordResetExpire');
+
+   if(!user){
+     return res.status(400).send({error:"User not found"});
+    } 
+
+   if(token != user.passwordResetToken){
+     return res.status(400).send({error:"token not found"});
+    }
+
+   const now= new Date()
+
+   if(now>user.passwordResetExpire){
+     return res.status(400).send({error:"token expirado"}); 
+    }
+
+    user.senha=senha;
+    await user.save();
+    res.send();
+
+} catch (error) {
+  console.log(err)
+  res.status(400).send({error:'Falha ao solicitar o processo'})
+}
+
+
+});
+
 
     module.exports = app
